@@ -215,8 +215,8 @@ public class FetchTaskThread implements Runnable{
                             execLocalPath);
 
                     // check and create Linux users
-                    FileUtils.createWorkDirAndUserIfAbsent(execLocalPath,
-                            tenant.getTenantCode(), logger);
+                    /*FileUtils.createWorkDirAndUserIfAbsent(execLocalPath,
+                            tenant.getTenantCode(), logger);*/
 
                     logger.info("task : {} ready to submit to task scheduler thread",taskInstId);
                     // submit task

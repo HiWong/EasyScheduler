@@ -476,5 +476,14 @@ export default {
   'warning of timeout': '超时告警',
   'Next five execution times': '接下来五次执行时间',
   'Execute time': '执行时间',
-  'Complement range': '补数范围'
+  'Complement range': '补数范围',
+  'Http Url':'请求地址',
+  'Http Method':'请求类型',
+  'Http Parameters Key':'参数名',
+  'Http Parameters Position':'参数位置',
+  'Http Parameters Value':'参数值',
+  'Http Check Condition':'校验条件',
+  'Http Condition':'校验内容',
+  'Please Enter Http Url': '请填写请求地址(必填)',
+  'Please Enter Http Condition': '请填写校验内容'
 }

@@ -159,6 +159,12 @@
                 ref="DEPENDENT"
                 :backfill-item="backfillItem">
         </m-dependent>
+        <m-http
+          v-if="taskType === 'HTTP'"
+          @on-params="_onParams"
+          ref="HTTP"
+          :backfill-item="backfillItem">
+        </m-http>
 
       </div>
     </div>
@@ -182,6 +188,7 @@
   import JSP from './../plugIn/jsPlumbHandle'
   import mProcedure from './tasks/procedure'
   import mDependent from './tasks/dependent'
+  import mHttp from './tasks/http'
   import mSubProcess from './tasks/sub_process'
   import mSelectInput from './_source/selectInput'
   import mTimeoutAlarm from './_source/timeoutAlarm'
@@ -457,6 +464,7 @@
       mSpark,
       mPython,
       mDependent,
+      mHttp,
       mSelectInput,
       mTimeoutAlarm,
       mPriority,

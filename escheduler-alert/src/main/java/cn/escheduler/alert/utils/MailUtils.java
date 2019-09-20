@@ -56,8 +56,6 @@ public class MailUtils {
 
     public static final String mailSender = getString(Constants.MAIL_SENDER);
 
-    public static final String mailUser = getString(Constants.MAIL_USER);
-
     public static final String mailPasswd = getString(Constants.MAIL_PASSWD);
 
     public static final Boolean mailUseStartTLS = getBoolean(Constants.MAIL_SMTP_STARTTLS_ENABLE);
@@ -69,8 +67,6 @@ public class MailUtils {
     public static final String starttlsEnable = getString(Constants.MAIL_SMTP_STARTTLS_ENABLE);
 
     public static final String sslEnable = getString(Constants.MAIL_SMTP_SSL_ENABLE);
-
-    public static final String sslTrust = getString(Constants.MAIL_SMTP_SSL_TRUST);
 
     private static Template MAIL_TEMPLATE;
 
@@ -130,10 +126,16 @@ public class MailUtils {
             HtmlEmail email = new HtmlEmail();
 
             try {
-                Session session = getSession();
-                email.setMailSession(session);
-                email.setFrom(mailSender);
+                // set the SMTP sending server, 163 as follows: "smtp.163.com"
+                email.setHostName(mailServerHost);
+                email.setSmtpPort(mailServerPort);
+                //set charset
                 email.setCharset(Constants.UTF_8);
+                // TLS verification
+                email.setTLS(Boolean.valueOf(starttlsEnable));
+
+                // SSL verification
+                email.setSSL(Boolean.valueOf(sslEnable));
                 if (CollectionUtils.isNotEmpty(receivers)){
                     // receivers mail
                     for (String receiver : receivers) {
@@ -284,11 +286,23 @@ public class MailUtils {
 //        Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
 //        final String SSL_FACTORY = "javax.net.ssl.SSLSocketFactory";
 
+        Properties props = new Properties();
+        props.setProperty(Constants.MAIL_HOST, mailServerHost);
+        props.setProperty(Constants.MAIL_SMTP_AUTH, Constants.STRING_TRUE);
+        props.setProperty(Constants.MAIL_TRANSPORT_PROTOCOL, mailProtocol);
+        props.setProperty(Constants.MAIL_SMTP_STARTTLS_ENABLE, starttlsEnable);
+        props.setProperty("mail.smtp.ssl.enable", sslEnable);
+        Authenticator auth = new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                // mail username and password
+                return new PasswordAuthentication(mailSender, mailPasswd);
+            }
+        };
         // 1. The first step in creating mail: creating session
-        Session session = getSession();
+        Session session = Session.getInstance(props, auth);
         // Setting debug mode, can be turned off
         session.setDebug(false);
-
         // 2. creating mail: Creating a MimeMessage
         MimeMessage msg = new MimeMessage(session);
         // 3. set sender
@@ -298,32 +312,6 @@ public class MailUtils {
             msg.addRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(receiver));
         }
         return msg;
-    }
-
-    /**
-     * get session
-     * @return
-     */
-    private static Session getSession() {
-        Properties props = new Properties();
-        props.setProperty(Constants.MAIL_HOST, mailServerHost);
-        props.setProperty(Constants.MAIL_PORT, String.valueOf(mailServerPort));
-        props.setProperty(Constants.MAIL_SMTP_AUTH, Constants.STRING_TRUE);
-        props.setProperty(Constants.MAIL_TRANSPORT_PROTOCOL, mailProtocol);
-        props.setProperty(Constants.MAIL_SMTP_STARTTLS_ENABLE, starttlsEnable);
-        props.setProperty(Constants.MAIL_SMTP_SSL_ENABLE, sslEnable);
-        props.setProperty(Constants.MAIL_SMTP_SSL_TRUST, sslTrust);
-
-        Authenticator auth = new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                // mail username and password
-                return new PasswordAuthentication(mailUser, mailPasswd);
-            }
-        };
-
-        Session session = Session.getInstance(props, auth);
-        return session;
     }
 
     /**
@@ -382,6 +370,13 @@ public class MailUtils {
      * @throws EmailException
      */
     private static Map<String, Object> getStringObjectMap(String title, String content, ShowType showType, Map<String, Object> retMap, HtmlEmail email) throws EmailException {
+        // sender's mailbox
+        email.setFrom(mailSender, mailSender);
+        /**
+         * if you need authentication information, set authentication: username-password.
+         * The registered name and password of the sender on the mail server respectively
+         */
+        email.setAuthentication(mailSender, mailPasswd);
 
         /**
          * the subject of the message to be sent

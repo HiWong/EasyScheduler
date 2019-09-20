@@ -18,27 +18,21 @@ package cn.escheduler.server.worker.log;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.sift.AbstractDiscriminator;
-import cn.escheduler.common.Constants;
 import cn.escheduler.server.utils.LoggerUtils;
 
 public class TaskLogDiscriminator extends AbstractDiscriminator<ILoggingEvent> {
 
     private String key;
 
-    private String logBase;
-
     /**
      * logger name should be like:
-     *     Task Logger name should be like: Task-{processDefinitionId}-{processInstanceId}-{taskInstanceId}
+     *     Task Logger name should be like: TaskLogInfo-{processDefinitionId}/{processInstanceId}/{taskInstanceId}
      */
-    @Override
     public String getDiscriminatingValue(ILoggingEvent event) {
-        String loggerName = event.getLoggerName()
-                .split(Constants.EQUAL_SIGN)[1];
+        String loggerName = event.getLoggerName();
         String prefix = LoggerUtils.TASK_LOGGER_INFO_PREFIX + "-";
         if (loggerName.startsWith(prefix)) {
-            return loggerName.substring(prefix.length(),
-                    loggerName.length() - 1).replace("-","/");
+            return loggerName.substring(prefix.length());
         } else {
             return "unknown_task";
         }
@@ -49,20 +43,11 @@ public class TaskLogDiscriminator extends AbstractDiscriminator<ILoggingEvent> {
         started = true;
     }
 
-    @Override
     public String getKey() {
         return key;
     }
 
     public void setKey(String key) {
         this.key = key;
-    }
-
-    public String getLogBase() {
-        return logBase;
-    }
-
-    public void setLogBase(String logBase) {
-        this.logBase = logBase;
     }
 }

@@ -47,15 +47,11 @@ public class Constants {
 
     public static final String MAIL_SENDER = "mail.sender";
 
-    public static final String MAIL_USER = "mail.user";
-
     public static final String MAIL_PASSWD = "mail.passwd";
 
     public static final String XLS_FILE_PATH = "xls.file.path";
 
-    public static final String MAIL_HOST = "mail.smtp.host";
-
-    public static final String MAIL_PORT = "mail.smtp.port";
+    public static final String MAIL_HOST = "mail.host";
 
     public static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
 
@@ -64,8 +60,6 @@ public class Constants {
     public static final String MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
 
     public static final String MAIL_SMTP_SSL_ENABLE = "mail.smtp.ssl.enable";
-
-    public static final String MAIL_SMTP_SSL_TRUST="mail.smtp.ssl.trust";
 
     public static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
 

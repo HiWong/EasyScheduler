@@ -17,7 +17,6 @@
 package cn.escheduler.api;
 
 import cn.escheduler.alert.AlertServer;
-import cn.escheduler.dao.AlertDao;
 import cn.escheduler.dao.ProcessDao;
 import cn.escheduler.server.master.MasterServer;
 import cn.escheduler.server.rpc.LoggerServer;
@@ -40,13 +39,11 @@ public class CombinedApplicationServer extends SpringBootServletInitializer {
 
         ConfigurableApplicationContext context = SpringApplication.run(ApiApplicationServer.class, args);
         ProcessDao processDao = context.getBean(ProcessDao.class);
-        AlertDao alertDao = context.getBean(AlertDao.class);
-
         MasterServer master = new MasterServer(processDao);
         master.run(processDao);
 
-        WorkerServer workerServer = new WorkerServer(processDao, alertDao);
-        workerServer.run(processDao, alertDao);
+        WorkerServer workerServer = new WorkerServer();
+        workerServer.run();
 
         LoggerServer server = new LoggerServer();
         server.start();

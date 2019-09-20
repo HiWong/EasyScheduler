@@ -61,6 +61,11 @@ public class ShellCommandExecutor extends AbstractCommandExecutor {
     }
 
     @Override
+    protected boolean checkShowLog(String line) {
+        return line.contains(taskAppId) || !line.contains("cn.escheduler.server.worker.log.TaskLogger");
+    }
+
+    @Override
     protected boolean checkFindApp(String line) {
         return line.contains(taskAppId);
     }

@@ -28,8 +28,7 @@ const handlerSuffix = {
   '.java': 'textile',
   '.sql': 'sql',
   '.hql': 'sql',
-  '.xml': 'xml',
-  '.properties': 'textile'
+  '.xml': 'xml'
 }
 
 

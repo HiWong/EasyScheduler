@@ -213,7 +213,7 @@ public class TaskInstanceMapperProvider {
      * @return
      */
     public String queryByHostAndStatus(Map<String, Object> parameter) {
-        StringBuilder strStates = new StringBuilder();
+        StringBuffer strStates = new StringBuffer();
         int[] stateArray = (int[]) parameter.get("states");
         for(int i=0;i<stateArray.length;i++){
             strStates.append(stateArray[i]);
@@ -246,7 +246,7 @@ public class TaskInstanceMapperProvider {
      * @return
      */
     public String queryLimitNumByHostAndStatus(Map<String, Object> parameter) {
-        StringBuilder strStates = new StringBuilder();
+        StringBuffer strStates = new StringBuffer();
         int[] stateArray = (int[]) parameter.get("states");
         for(int i=0;i<stateArray.length;i++){
             strStates.append(stateArray[i]);
@@ -278,7 +278,7 @@ public class TaskInstanceMapperProvider {
      * @return
      */
     public String setFailoverByHostAndStateArray(Map<String, Object> parameter) {
-        StringBuilder strStates = new StringBuilder();
+        StringBuffer strStates = new StringBuffer();
         int[] stateArray = (int[]) parameter.get("states");
         int state = ExecutionStatus.NEED_FAULT_TOLERANCE.ordinal();
         for(int i=0;i<stateArray.length;i++){
@@ -419,7 +419,7 @@ public class TaskInstanceMapperProvider {
      */
     public String countTask(Map<String, Object> parameter){
 
-        StringBuilder taskIdsStr = new StringBuilder();
+        StringBuffer taskIdsStr = new StringBuffer();
         int[] stateArray = (int[]) parameter.get("taskIds");
         for(int i=0;i<stateArray.length;i++){
             taskIdsStr.append(stateArray[i]);

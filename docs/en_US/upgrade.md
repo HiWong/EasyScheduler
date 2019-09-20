@@ -5,7 +5,7 @@
 
 ## 2. Stop all services of escheduler
 
- `sh ./script/stop-all.sh`
+ `sh ./script/stop_all.sh`
 
 ## 3. Download the new version of the installation package
 
@@ -23,7 +23,7 @@
 
 - Execute database upgrade script
 
-`sh ./script/upgrade-escheduler.sh`
+`sh ./script/upgrade_escheduler.sh`
 
 ## 5. Backend service upgrade
 

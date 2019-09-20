@@ -645,6 +645,7 @@ JSP.prototype.saveStore = function () {
       })
     })
 
+    console.log(tasksAll())
 
     _.map(tasksAll(), v => {
       locations[v.id] = {
@@ -655,6 +656,7 @@ JSP.prototype.saveStore = function () {
       }
     })
 
+    console.log(locations)
 
     // Storage node
     store.commit('dag/setTasks', tasks)

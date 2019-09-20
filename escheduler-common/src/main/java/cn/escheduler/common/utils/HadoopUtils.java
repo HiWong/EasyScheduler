@@ -66,10 +66,6 @@ public class HadoopUtils implements Closeable {
     }
 
     public static HadoopUtils getInstance(){
-        // if kerberos startup , renew HadoopUtils
-        if (CommonUtils.getKerberosStartupState()){
-            return new HadoopUtils();
-        }
         return instance;
     }
 

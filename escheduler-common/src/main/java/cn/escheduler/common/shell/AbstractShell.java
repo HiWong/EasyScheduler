@@ -157,7 +157,7 @@ public abstract class AbstractShell {
     BufferedReader inReader = 
             new BufferedReader(new InputStreamReader(process
                                                      .getInputStream()));
-    final StringBuilder errMsg = new StringBuilder();
+    final StringBuffer errMsg = new StringBuffer();
     
     // read error and input streams as this would free up the buffers
     // free the error stream buffer

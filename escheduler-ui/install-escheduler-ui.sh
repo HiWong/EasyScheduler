@@ -1,21 +1,21 @@
 #!/bin/bash
-# current path
+# 当前路径
 esc_basepath=$(cd `dirname $0`; pwd)
 
 menu(){
         cat <<END
 =================================================
-        1.CentOS6 Installation
-        2.CentOS7 Installation
-        3.Ubuntu Installation
-        4.Exit
+        1.CentOS6安装
+        2.CentOS7安装
+        3.Ubuntu安装
+        4.退出
 =================================================
 END
 }
 
 
-# create a file and configure nginx
-dolphinschedulerConf(){
+# 创建文件并配置nginx
+eschedulerConf(){
 
     E_host='$host'
     E_remote_addr='$remote_addr'
@@ -23,16 +23,16 @@ dolphinschedulerConf(){
     E_http_upgrade='$http_upgrade'
     echo "
         server {
-            listen       $1;# access port
+            listen       $1;# 访问端口
             server_name  localhost;
             #charset koi8-r;
             #access_log  /var/log/nginx/host.access.log  main;
             location / {
-            root   ${esc_basepath}/dist; # static file directory
+            root   ${esc_basepath}/dist; # 静态文件目录
             index  index.html index.html;
             }
             location /escheduler {
-            proxy_pass $2; # interface address
+            proxy_pass $2; # 接口地址
             proxy_set_header Host $E_host;
             proxy_set_header X-Real-IP $E_remote_addr;
             proxy_set_header x_real_ipP $E_remote_addr;
@@ -53,21 +53,21 @@ dolphinschedulerConf(){
             root   /usr/share/nginx/html;
             }
         }
-    " >> /etc/nginx/conf.d/dolphinscheduler.conf
+    " >> /etc/nginx/conf.d/escheduler.conf
 
 }
 
 ubuntu(){
-    # update source
+    #更新源
     apt-get update
 
-    # install nginx
+    #安装nginx
     apt-get install -y nginx
 
-    # config nginx
-    dolphinschedulerConf $1 $2
+    # 配置nginx
+    eschedulerConf $1 $2
 
-    # startup nginx
+    # 启动nginx
     /etc/init.d/nginx start
     sleep 1
     if [ $? -ne 0 ];then
@@ -81,17 +81,17 @@ centos7(){
     rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
     yum install -y nginx
 
-    # config nginx
-    dolphinschedulerConf $1 $2
+    # 配置nginx
+    eschedulerConf $1 $2
 
-    # solve 0.0.0.0:8888 problem
+    # 解决 0.0.0.0:8888 问题
     yum -y install policycoreutils-python
     semanage port -a -t http_port_t -p tcp $esc_proxy
 
-    # open front access port
+    # 开放前端访问端口
     firewall-cmd --zone=public --add-port=$esc_proxy/tcp --permanent
 
-    # startup nginx
+    # 启动nginx
     systemctl start nginx
     sleep 1
     if [ $? -ne 0 ];then
@@ -99,9 +99,9 @@ centos7(){
     fi
     nginx -s reload
 
-    # set SELinux parameters
+    # 调整SELinux的参数
     sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
-    # temporary effect
+    # 临时生效
     setenforce 0
 
 }
@@ -114,10 +114,10 @@ centos6(){
     # install nginx
     yum install nginx -y
 
-    # config nginx
-    dolphinschedulerConf $1 $2
+    # 配置nginx
+    eschedulerConf $1 $2
 
-    # startup nginx
+    # 启动nginx
     /etc/init.d/nginx start
     sleep 1
 	if [ $? -ne 0 ];then
@@ -125,17 +125,17 @@ centos6(){
     fi
     nginx -s reload
 
-    # set SELinux parameters
+    # 调整SELinux的参数
     sed -i "s/SELINUX=enforcing/SELINUX=disabled/g" /etc/selinux/config
 
-    # temporary effect
+    # 临时生效
     setenforce 0
 
 }
 
 function main(){
-	echo "Welcome to thedolphinscheduler front-end deployment script, which is currently only supported by front-end deployment scripts : CentOS and Ubuntu"
-	echo "Please execute in the dolphinscheduler-ui directory"
+	echo "欢迎使用easy scheduler前端部署脚本,目前前端部署脚本仅支持CentOS,Ubuntu"
+	echo "请在 escheduler-ui 目录下执行"
 
 	#To be compatible with MacOS and Linux
 	if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -166,33 +166,33 @@ function main(){
 	fi
 
 
-	# config front-end access ports
-	read -p "Please enter the nginx proxy port, do not enter, the default is 8888 :" esc_proxy_port
+	# 配置前端访问端口
+	read -p "请输入nginx代理端口，不输入，则默认8888 :" esc_proxy_port
 	if [ -z "${esc_proxy_port}" ];then
     	esc_proxy_port="8888"
 	fi
 
-	read -p "Please enter the api server proxy ip, you must enter, for example: 192.168.xx.xx :" esc_api_server_ip
+	read -p "请输入api server代理ip,必须输入，例如：192.168.xx.xx :" esc_api_server_ip
 	if [ -z "${esc_api_server_ip}" ];then
-		echo "api server proxy ip can not be empty."
+		echo "api server代理ip不能为空."
 		exit 1
 	fi
 
-	read -p "Please enter the api server proxy port, do not enter, the default is 12345:" esc_api_server_port
+	read -p "请输入api server代理端口,不输入，则默认12345 :" esc_api_server_port
 	if [ -z "${esc_api_server_port}" ];then
 		esc_api_server_port="12345"
 	fi
 
-	# api server backend address
+	# api server后端地址
 	esc_api_server="http://$esc_api_server_ip:$esc_api_server_port"
 
-	# local ip address
+	# 本机ip地址
 	esc_ipaddr=$(ip a | grep inet | grep -v inet6 | grep -v 127 | sed 's/^[ \t]*//g' | cut -d ' ' -f2 | head -n 1 | awk -F '/' '{print $1}')
 
-	# Prompt message
+	# 提示信息
 	menu
 
-	read -p "Please enter the installation number(1|2|3|4)：" num
+	read -p "请输入安装编号(1|2|3|4)：" num
 
    	case $num in
         	1)
@@ -212,7 +212,7 @@ function main(){
                 	echo $"Usage :sh $0"
                 	exit 1
 	esac
-	echo "Please visit the browser：http://${esc_ipaddr}:${esc_proxy_port}"
+	echo "请浏览器访问：http://${esc_ipaddr}:${esc_proxy_port}"
 
 }
 

@@ -59,7 +59,7 @@ public class HttpClientTest {
         try {
             // execute
             response = httpclient.execute(httpPost);
-            // response status code 200
+            // eponse status code 200
             if (response.getStatusLine().getStatusCode() == 200) {
                 String content = EntityUtils.toString(response.getEntity(), "UTF-8");
                 logger.info(content);
@@ -96,7 +96,7 @@ public class HttpClientTest {
         try {
             // execute http get request
             response = httpclient.execute(httpGet);
-            // response status code 200
+            // reponse status code 200
             if (response.getStatusLine().getStatusCode() == 200) {
                 String content = EntityUtils.toString(response.getEntity(), "UTF-8");
                 logger.info("start--------------->");
@@ -139,7 +139,7 @@ public class HttpClientTest {
         try {
             // execute http get request
             response = httpclient.execute(httpGet);
-            // response status code 200
+            // reponse status code 200
             if (response.getStatusLine().getStatusCode() == 200) {
                 String content = EntityUtils.toString(response.getEntity(), "UTF-8");
                 logger.info("start--------------->");

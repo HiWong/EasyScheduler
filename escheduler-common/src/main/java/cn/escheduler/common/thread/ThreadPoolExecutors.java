@@ -40,7 +40,7 @@ public class ThreadPoolExecutors {
 
     private static final Logger logger = LoggerFactory.getLogger(ThreadPoolExecutors.class);
     private static Executor executor;
-    private static volatile ThreadPoolExecutors threadPoolExecutors;
+    private static ThreadPoolExecutors threadPoolExecutors;
 
     private ThreadPoolExecutors(){}
 

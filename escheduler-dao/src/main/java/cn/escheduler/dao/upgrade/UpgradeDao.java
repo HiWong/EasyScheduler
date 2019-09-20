@@ -16,8 +16,7 @@
  */
 package cn.escheduler.dao.upgrade;
 
-import cn.escheduler.common.enums.DbType;
-import cn.escheduler.common.utils.ConnectionUtils;
+import cn.escheduler.common.utils.MysqlUtils;
 import cn.escheduler.common.utils.ScriptRunner;
 import cn.escheduler.dao.AbstractBaseDao;
 import cn.escheduler.dao.datasource.ConnectionFactory;
@@ -30,9 +29,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 
-public abstract class UpgradeDao extends AbstractBaseDao {
+public class UpgradeDao extends AbstractBaseDao {
 
     public static final Logger logger = LoggerFactory.getLogger(UpgradeDao.class);
     private static final String T_VERSION_NAME = "t_escheduler_version";
@@ -43,59 +41,35 @@ public abstract class UpgradeDao extends AbstractBaseDao {
 
     }
 
-    /**
-     * get db type
-     * @return
-     */
-    public static DbType getDbType(){
-        try {
-            Connection conn = ConnectionFactory.getDataSource().getConnection();
-            String name = conn.getMetaData().getDatabaseProductName().toUpperCase();
-            return DbType.valueOf(name);
-        } catch (Exception e) {
-            logger.error(e.getMessage(),e);
-            return null;
-        }
+    private static class UpgradeDaoHolder {
+        private static final UpgradeDao INSTANCE = new UpgradeDao();
     }
 
-    public void initSchema(){
-        DbType dbType = getDbType();
-        String initSqlPath = "";
-        if (dbType != null) {
-            switch (dbType) {
-                case MYSQL:
-                    initSqlPath = "/sql/create/release-1.0.0_schema/mysql/";
-                    initSchema(initSqlPath);
-                    break;
-                case POSTGRESQL:
-                    initSqlPath = "/sql/create/release-1.2.0_schema/postgresql/";
-                    initSchema(initSqlPath);
-                    break;
-                default:
-                    logger.error("not support sql type: {},can't upgrade", dbType);
-                    throw new IllegalArgumentException("not support sql type,can't upgrade");
-            }
-        }
+    private UpgradeDao() {
+    }
+
+    public static final UpgradeDao getInstance() {
+        return UpgradeDaoHolder.INSTANCE;
     }
 
 
-    public void initSchema(String initSqlPath) {
+
+    public void initEschedulerSchema() {
 
         // Execute the escheduler DDL, it cannot be rolled back
-        runInitDDL(initSqlPath);
+        runInitEschedulerDDL();
 
         // Execute the escheduler DML, it can be rolled back
-        runInitDML(initSqlPath);
+        runInitEschedulerDML();
 
     }
 
-    private void runInitDML(String initSqlPath) {
+    private void runInitEschedulerDML() {
         Connection conn = null;
         if (StringUtils.isEmpty(rootDir)) {
             throw new RuntimeException("Environment variable user.dir not found");
         }
-        //String mysqlSQLFilePath = rootDir + "/sql/create/release-1.0.0_schema/mysql/escheduler_dml.sql";
-        String mysqlSQLFilePath = rootDir + initSqlPath + "dolphinscheduler_dml.sql";
+        String mysqlSQLFilePath = rootDir + "/sql/create/release-1.0.0_schema/mysql/escheduler_dml.sql";
         try {
             conn = ConnectionFactory.getDataSource().getConnection();
             conn.setAutoCommit(false);
@@ -124,19 +98,18 @@ public abstract class UpgradeDao extends AbstractBaseDao {
             logger.error(e.getMessage(),e);
             throw new RuntimeException(e.getMessage(),e);
         } finally {
-            ConnectionUtils.releaseResource(null, null, conn);
+            MysqlUtils.releaseResource(null, null, conn);
 
         }
 
     }
 
-    private void runInitDDL(String initSqlPath) {
+    private void runInitEschedulerDDL() {
         Connection conn = null;
         if (StringUtils.isEmpty(rootDir)) {
             throw new RuntimeException("Environment variable user.dir not found");
         }
-        //String mysqlSQLFilePath = rootDir + "/sql/create/release-1.0.0_schema/mysql/dolphinscheduler_ddl.sql";
-        String mysqlSQLFilePath = rootDir + initSqlPath + "dolphinscheduler_ddl.sql";
+        String mysqlSQLFilePath = rootDir + "/sql/create/release-1.0.0_schema/mysql/escheduler_ddl.sql";
         try {
             conn = ConnectionFactory.getDataSource().getConnection();
             // Execute the escheduler_ddl.sql script to create the table structure of escheduler
@@ -153,7 +126,7 @@ public abstract class UpgradeDao extends AbstractBaseDao {
             logger.error(e.getMessage(),e);
             throw new RuntimeException(e.getMessage(),e);
         } finally {
-            ConnectionUtils.releaseResource(null, null, conn);
+            MysqlUtils.releaseResource(null, null, conn);
 
         }
 
@@ -164,7 +137,26 @@ public abstract class UpgradeDao extends AbstractBaseDao {
      * @param tableName
      * @return
      */
-    public abstract boolean isExistsTable(String tableName);
+    public boolean isExistsTable(String tableName) {
+        Connection conn = null;
+        try {
+            conn = ConnectionFactory.getDataSource().getConnection();
+            ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (SQLException e) {
+            logger.error(e.getMessage(),e);
+            throw new RuntimeException(e.getMessage(),e);
+        } finally {
+            MysqlUtils.releaseResource(null, null, conn);
+
+        }
+
+    }
 
     /**
      * Determines whether a field exists in the specified table
@@ -172,7 +164,26 @@ public abstract class UpgradeDao extends AbstractBaseDao {
      * @param columnName
      * @return
      */
-    public abstract boolean isExistsColumn(String tableName,String columnName);
+    public boolean isExistsColumn(String tableName,String columnName) {
+        Connection conn = null;
+        try {
+            conn = ConnectionFactory.getDataSource().getConnection();
+            ResultSet rs = conn.getMetaData().getColumns(null,null,tableName,columnName);
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (SQLException e) {
+            logger.error(e.getMessage(),e);
+            throw new RuntimeException(e.getMessage(),e);
+        } finally {
+            MysqlUtils.releaseResource(null, null, conn);
+
+        }
+
+    }
 
 
     public String getCurrentVersion() {
@@ -196,26 +207,26 @@ public abstract class UpgradeDao extends AbstractBaseDao {
             logger.error(e.getMessage(),e);
             throw new RuntimeException("sql: " + sql, e);
         } finally {
-            ConnectionUtils.releaseResource(rs, pstmt, conn);
+            MysqlUtils.releaseResource(rs, pstmt, conn);
+
         }
     }
 
 
-    public void upgradeDolphinScheduler(String schemaDir) {
+    public void upgradeEscheduler(String schemaDir) {
 
-        upgradeDolphinSchedulerDDL(schemaDir);
+        upgradeEschedulerDDL(schemaDir);
 
-        upgradeDolphinSchedulerDML(schemaDir);
+        upgradeEschedulerDML(schemaDir);
 
     }
 
-    private void upgradeDolphinSchedulerDML(String schemaDir) {
+    private void upgradeEschedulerDML(String schemaDir) {
         String schemaVersion = schemaDir.split("_")[0];
         if (StringUtils.isEmpty(rootDir)) {
             throw new RuntimeException("Environment variable user.dir not found");
         }
-        String mysqlSQLFilePath = MessageFormat.format("{0}/sql/upgrade/{1}/{2}/dolphinscheduler_dml.sql",rootDir,schemaDir,getDbType().name().toLowerCase());
-        logger.info("mysqlSQLFilePath"+mysqlSQLFilePath);
+        String mysqlSQLFilePath = rootDir + "/sql/upgrade/" + schemaDir + "/mysql/escheduler_dml.sql";
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
@@ -266,16 +277,16 @@ public abstract class UpgradeDao extends AbstractBaseDao {
             logger.error(e.getMessage(),e);
             throw new RuntimeException(e.getMessage(),e);
         } finally {
-            ConnectionUtils.releaseResource(null, pstmt, conn);
+            MysqlUtils.releaseResource(null, pstmt, conn);
         }
 
     }
 
-    private void upgradeDolphinSchedulerDDL(String schemaDir) {
+    private void upgradeEschedulerDDL(String schemaDir) {
         if (StringUtils.isEmpty(rootDir)) {
             throw new RuntimeException("Environment variable user.dir not found");
         }
-        String mysqlSQLFilePath = MessageFormat.format("{0}/sql/upgrade/{1}/{2}/dolphinscheduler_dml.sql",rootDir,schemaDir,getDbType().name().toLowerCase());
+        String mysqlSQLFilePath = rootDir + "/sql/upgrade/" + schemaDir + "/mysql/escheduler_ddl.sql";
         Connection conn = null;
         PreparedStatement pstmt = null;
         try {
@@ -305,7 +316,7 @@ public abstract class UpgradeDao extends AbstractBaseDao {
             logger.error(e.getMessage(),e);
             throw new RuntimeException(e.getMessage(),e);
         } finally {
-            ConnectionUtils.releaseResource(null, pstmt, conn);
+            MysqlUtils.releaseResource(null, pstmt, conn);
         }
 
     }
@@ -327,7 +338,7 @@ public abstract class UpgradeDao extends AbstractBaseDao {
             logger.error(e.getMessage(),e);
             throw new RuntimeException("sql: " + upgradeSQL, e);
         } finally {
-            ConnectionUtils.releaseResource(null, pstmt, conn);
+            MysqlUtils.releaseResource(null, pstmt, conn);
         }
 
     }

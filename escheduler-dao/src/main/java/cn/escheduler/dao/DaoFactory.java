@@ -16,10 +16,10 @@
  */
 package cn.escheduler.dao;
 
-import cn.escheduler.dao.utils.BeanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,12 +48,11 @@ public class DaoFactory {
     synchronized (daoMap) {
       if (!daoMap.containsKey(className)) {
         try {
-//          T t = BeanContext.getBean(clazz);
           T t = clazz.getConstructor().newInstance();
           // 实例初始化
           t.init();
           daoMap.put(className, t);
-        } catch (Exception e) {
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
           logger.error(e.getMessage(), e);
         }
       }

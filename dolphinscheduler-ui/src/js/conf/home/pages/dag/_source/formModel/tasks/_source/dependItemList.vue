@@ -126,7 +126,7 @@
       },
       _getProjectList() {
         return new Promise((resolve, reject) => {
-          this.projectList = _.map(_.cloneDeep(this.store.state.dag.projectAll), v => {
+          this.projectList = _.map(_.cloneDeep(this.store.state.dag.projectListS), v => {
             return {
               value: v.id,
               label: v.name
